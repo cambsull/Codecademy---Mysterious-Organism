@@ -13,85 +13,64 @@ const mockUpStrand = () => {
   return newStrand;
 };
 
-//Factory function that returns and object that contains the properties specimenNum and dna
-let pAequorFactory = (specimenNum, dna) => {
+// Factory function that returns an object that contains the properties specimenNum and dna
+function pAequorFactory(specimenNum, dna){
   return {
     specimenNum: specimenNum,
     dna: dna,
     mutate() {
-      //Select a new base index and DNA base to mutate into original dna.
-      let newBase = returnRandBase();
-      const newBaseIndex = Math.floor(Math.random() * 15);
-      //Let the user know what has been selected
+      const newBaseIndex = Math.floor(Math.random() * dna.length);
+      let random = returnRandBase();
       console.log(
-        `\nMutation base index: ${newBaseIndex}. Mutation base: ${newBase}.\n`
+        `Specimen ${this.specimenNum} position ${newBaseIndex + 1} DNA base ${
+          this.dna[newBaseIndex]
+        }`
       );
-      //In the event that the new index and DNA base happen to match the original DNA, try again until they do not match.
-      while (dna[newBaseIndex] === newBase) {
-        console.log(
-          `\nBases at index ${newBaseIndex} match, reconfiguring...\n`
-        );
-        newBase = returnRandBase();
-        console.log(
-          `\nNew base returned at index ${newBaseIndex}: ${newBase}.\n`
-        );
+      while (this.dna[newBaseIndex] === random) {
+        random = returnRandBase();
       }
-      //Once they no longer match, update the index for the DNA mutation.
-      if (newBase !== dna[newBaseIndex]) {
-        dna[newBaseIndex] = newBase;
-      }
-      dna[newBaseIndex] = newBase;
+      this.dna[newBaseIndex] = random;
+      console.log(`${this.dna[newBaseIndex]}`);
     },
     compareDNA(pAequorObj) {
-      //Compares current DNA with passed in pAequor DNA, computes how many bases are identical and in the same index (as a percentage).
-
-      //Start by console logging the two objects' specimen numbers and DNA strands
-      console.log(`\nComparing DNA strands:`);
-      console.log(`\nSpecimen: ${this.specimenNum}. Bases: ${this.dna}`);
-      console.log(
-        `\nSpecimen: ${pAequorObj.specimenNum}. Bases ${pAequorObj.dna}`
-      );
-
-      //Compute the percentage of identical indexes and bases
       let counter = 0;
-      for (i = 0; i < this.dna.length; i++) {
+      for (let i = 0; i < this.dna.length; i++) {
         if (this.dna[i] === pAequorObj.dna[i]) {
           counter++;
         }
       }
-      const percentageInCommon = Math.floor((counter / 15) * 100);
+      const percentageInCommon = (counter / 15) * 100;
       console.log(
         "\nThe specimens have " + percentageInCommon + "% DNA in common."
       );
     },
     willLikelySurvive() {
-      //Calculates the percentage of total C & G bases in the DNA strand combined and returns true if they make up at least 60% of the DNA strand
       let CGCounter = 0;
-      for (i = 0; i < this.dna.length; i++) {
+      for (let i = 0; i < this.dna.length; i++) {
         if (this.dna[i] === "C" || this.dna[i] === "G") {
           CGCounter++;
         }
       }
-      return Math.floor((CGCounter / 15) * 100) >= 60;
-    },
+
+      const survivalPercentage = CGCounter / this.dna.length;
+      const willSurvive = survivalPercentage >= 0.6;
+
+      if (willSurvive) {
+        console.log(`specimen # ${this.specimenNum} will likely survive!`);
+      } else {
+        console.log(`specimen # ${this.specimenNum} will not survive!`);
+      }
+
+      return willSurvive;
+    }
   };
 };
 
-//Function to create 30 instances of objects as long as Obj.willLikelySurvive() returns true
-
-let survivableInstances = []; //Empty array to store surviveable instances
-
-const createInstances = () => {
-let count = 1;
-  while (count < 30) {
-    let instance = (pAequorFactory(count, mockUpStrand()));
-    if (instance.willLikelySurvive()) {
-      count += 1;
-      survivableInstances.push(instance);
-    }
-    
+const pAequorArray = [];
+for (let i = 1; i <= 30; i++) {
+  const pAequor = pAequorFactory(i, mockUpStrand());
+  if (pAequor.willLikelySurvive()) {
+    pAequorArray.push(pAequor);
   }
-  return survivableInstances;
 }
-
-console.log(createInstances());
+console.log(JSON.stringify(pAequorArray, null, 2));
